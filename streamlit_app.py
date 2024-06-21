@@ -14,7 +14,7 @@ def scam_conversation(scam_type):
     pass
 
 # Function to learn about scams
-def learn_about_scams(scams, columns=3, initial_lines=2):
+def learn_about_scams(scams, columns=3, initial_lines=3):
     st.write("Choose a scam to learn about:")
 
     # Initialize the session state if not already done
@@ -28,16 +28,22 @@ def learn_about_scams(scams, columns=3, initial_lines=2):
     # Determine the number of scams to display based on the expanded state
     scam_keys = list(scams.keys())
     total_scams = len(scam_keys)
-    lines_to_display = initial_lines if not st.session_state.expanded else (total_scams + columns - 1) // columns
+    lines_to_display = total_scams if st.session_state.expanded else initial_lines
+    lines_to_display = min(lines_to_display, total_scams)
 
-    # Display the scam buttons in columns
-    for i in range(0, lines_to_display * columns, columns):
-        cols = st.columns(columns)
-        for j, col in enumerate(cols):
-            if i + j < total_scams:
-                scam = scam_keys[i + j]
-                if col.button(scam):
-                    st.write(scams[scam])
+    # Display the scam buttons in columns inside a container
+    with st.container(height = 150, border= False):
+        for i in range(0, lines_to_display * columns, columns):
+            cols = st.columns(columns)
+            for j, col in enumerate(cols):
+                if i + j < total_scams:
+                    scam = scam_keys[i + j]
+                    if col.button(scam):
+                        st.session_state.selected_scam = scam
+
+    # Display the description of the selected scam outside of the container
+    if 'selected_scam' in st.session_state and st.session_state.selected_scam in scams:
+        st.write(scams[st.session_state.selected_scam])
 
     # Button to show more or less scams
     if st.session_state.expanded:
